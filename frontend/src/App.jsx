@@ -5,6 +5,10 @@ import { useState, useEffect } from 'react'
 function App() {
   // Use environment variable and remove trailing slash
   const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '')
+  
+  // Debug: Log the API URL
+  console.log('API_URL:', API_URL)
+  console.log('Environment VITE_API_URL:', import.meta.env.VITE_API_URL)
 
   // Generate or retrieve unique user ID from localStorage
   const getUserId = () => {
@@ -22,26 +26,45 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [completedTodos, setCompletedTodos] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const fetchTodos = async () => {
     try {
-      const response = await fetch(`${API_URL}/todos`, {
+      setLoading(true)
+      setError(null)
+      
+      const url = `${API_URL}/todos`
+      console.log('Fetching todos from:', url)
+      console.log('User ID:', userId)
+      
+      const response = await fetch(url, {
         headers: {
           'X-User-ID': userId
         }
       })
+      
+      console.log('Response status:', response.status)
+      console.log('Response ok:', response.ok)
+      
       const data = await response.json()
+      console.log('Response data:', data)
       
       // Check if response was successful and has todos
       if (response.ok && data.todos) {
         setTodos(data.todos)
       } else {
-        console.error('Failed to fetch todos:', data.message || 'Unknown error')
+        const errorMsg = data.message || 'Unknown error'
+        console.error('Failed to fetch todos:', errorMsg)
+        setError(errorMsg)
         setTodos([]) // Set empty array on error
       }
     } catch (error) {
       console.error('Error fetching todos:', error)
+      setError(error.message || 'Failed to connect to server')
       setTodos([]) // Set empty array on error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -162,7 +185,19 @@ function App() {
               <div className='w-full md:w-1/2 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-h-[600px] overflow-auto'>
                 <h2 className='text-white text-2xl font-bold mb-5'>Your Todos</h2>
 
-                {!todos || todos.length === 0 ? (
+                {loading ? (
+                  <p className='text-white/60 text-center py-8'>Loading todos...</p>
+                ) : error ? (
+                  <div className='text-center py-8'>
+                    <p className='text-red-400 mb-2'>Error: {error}</p>
+                    <button 
+                      onClick={fetchTodos}
+                      className='px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold transition-all'
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : !todos || todos.length === 0 ? (
                   <p className='text-white/60 text-center py-8'>No todos yet. Add one!</p>
                 ) : (
                   <div className='space-y-4'>
