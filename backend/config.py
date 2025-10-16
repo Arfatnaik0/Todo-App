@@ -7,7 +7,7 @@ CORS(app, resources={
     r"/*": {
         "origins": [
             "http://localhost:5173",
-            "https://*.vercel.app"  
+            "https://todofrontend-teal.vercel.app/"  
         ]
     }
 })
