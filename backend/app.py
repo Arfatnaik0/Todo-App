@@ -1,4 +1,5 @@
 # Import necessary stuff
+import os
 from flask import request,jsonify
 from config import db,app
 from models import Todo
@@ -64,4 +65,5 @@ if __name__=="__main__":
     with app.app_context():
         db.create_all()
     
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
