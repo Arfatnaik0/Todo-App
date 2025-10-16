@@ -6,6 +6,18 @@ function App() {
   // Use environment variable and remove trailing slash
   const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '')
 
+  // Generate or retrieve unique user ID from localStorage
+  const getUserId = () => {
+    let userId = localStorage.getItem('userId')
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substring(2, 15) + Date.now()
+      localStorage.setItem('userId', userId)
+    }
+    return userId
+  }
+
+  const userId = getUserId()
+
   const [todos, setTodos] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -13,7 +25,11 @@ function App() {
 
   const fetchTodos = async () => {
     try {
-      const response = await fetch(`${API_URL}/todos`)
+      const response = await fetch(`${API_URL}/todos`, {
+        headers: {
+          'X-User-ID': userId
+        }
+      })
       const data = await response.json()
       setTodos(data.todos)
     } catch (error) {
@@ -34,6 +50,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-ID': userId
         },
         body: JSON.stringify({ title, description }),
       })
@@ -52,6 +69,9 @@ function App() {
     try {
       const response = await fetch(`${API_URL}/delete_todo/${id}`, {
         method: 'DELETE',
+        headers: {
+          'X-User-ID': userId
+        }
       })
 
       if (response.ok) {
