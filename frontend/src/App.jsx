@@ -31,9 +31,17 @@ function App() {
         }
       })
       const data = await response.json()
-      setTodos(data.todos)
+      
+      // Check if response was successful and has todos
+      if (response.ok && data.todos) {
+        setTodos(data.todos)
+      } else {
+        console.error('Failed to fetch todos:', data.message || 'Unknown error')
+        setTodos([]) // Set empty array on error
+      }
     } catch (error) {
       console.error('Error fetching todos:', error)
+      setTodos([]) // Set empty array on error
     }
   }
 
@@ -154,7 +162,7 @@ function App() {
               <div className='w-full md:w-1/2 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-h-[600px] overflow-auto'>
                 <h2 className='text-white text-2xl font-bold mb-5'>Your Todos</h2>
 
-                {todos.length === 0 ? (
+                {!todos || todos.length === 0 ? (
                   <p className='text-white/60 text-center py-8'>No todos yet. Add one!</p>
                 ) : (
                   <div className='space-y-4'>
