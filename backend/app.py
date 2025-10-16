@@ -9,16 +9,24 @@ from models import Todo
 def hello():
    return "Hello world"
 
-# Get all the todos already in database
+# Get all the todos for a specific user
 @app.route("/todos", methods=["GET"])
 def get_todos():
-    todos = Todo.query.all()
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return jsonify({"message": "User ID required"}), 400
+    
+    todos = Todo.query.filter_by(user_id=user_id).all()
     json_todos = list(map(lambda x: x.to_json(), todos))
     return jsonify({"todos": json_todos})
 
 # create a todo
 @app.route("/create_todo", methods=["POST"])
 def create_todo():
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return jsonify({"message": "User ID required"}), 400
+    
     title = request.json.get("title")
     description = request.json.get("description")
 
@@ -27,7 +35,7 @@ def create_todo():
             jsonify({"message": "You must include a title and description"}), 400
         )
 
-    new_todo = Todo(title=title, description=description)
+    new_todo = Todo(title=title, description=description, user_id=user_id)
     db.session.add(new_todo)
     db.session.commit()
     return jsonify({"message": "Todo created successfully"}), 201
@@ -35,7 +43,11 @@ def create_todo():
 # edit todo
 @app.route("/edit_todo/<int:id>", methods=["PATCH"])
 def update_todo(id):
-    todo = Todo.query.get(id)
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return jsonify({"message": "User ID required"}), 400
+    
+    todo = Todo.query.filter_by(id=id, user_id=user_id).first()
 
     if not todo:
         return jsonify({"message": "Todo not found"}), 404
@@ -50,7 +62,11 @@ def update_todo(id):
 # delete todo
 @app.route("/delete_todo/<int:id>", methods=["DELETE"])
 def delete_todo(id):
-    todo = Todo.query.get(id)
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return jsonify({"message": "User ID required"}), 400
+    
+    todo = Todo.query.filter_by(id=id, user_id=user_id).first()
 
     if not todo:
         return jsonify({"message": "Todo not found"}), 404

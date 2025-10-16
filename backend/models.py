@@ -6,6 +6,7 @@ class Todo(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     title=db.Column(db.String(40),nullable=False)
     description=db.Column(db.String(120),nullable=False)
+    user_id=db.Column(db.String(100),nullable=False)  # Store user's unique ID
 
 # to json funtion(for react to understand)
     def to_json(self):
@@ -13,4 +14,5 @@ class Todo(db.Model):
             "id":self.id,
             "title":self.title,
             "description":self.description,
+            "user_id":self.user_id,
         }
