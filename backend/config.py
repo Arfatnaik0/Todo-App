@@ -7,7 +7,8 @@ CORS(app, resources={
     r"/*": {
         "origins": [
             "http://localhost:5173",
-            "https://todofrontend-teal.vercel.app/"  
+            "https://todofrontend-teal.vercel.app",
+            "https://todofrontend-mrr8loihn-arfat-naiks-projects.vercel.app"
         ]
     }
 })
