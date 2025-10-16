@@ -3,7 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 app=Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "http://localhost:5173",
+            "https://*.vercel.app"  
+        ]
+    }
+})
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///todos.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
